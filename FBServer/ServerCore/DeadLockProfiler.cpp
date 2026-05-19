@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "DeadLockProfiler.h"
 
+thread_local stack<int32> DeadLockProfiler::_lockStack;
+
 void DeadLockProfiler::PushLock(const char* name)
 {
 	LockGuard guard(_lock);

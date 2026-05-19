@@ -43,6 +43,9 @@ void Room::Enter(PlayerRef player)
 
 void Room::Leave(PlayerRef player)
 {
+    if (_players.find(player->playerId) == _players.end())
+        return;
+
     _players.erase(player->playerId);
     player->room = nullptr;
 

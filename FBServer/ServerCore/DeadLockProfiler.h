@@ -16,8 +16,10 @@ private:
 private:
 	unordered_map<const char*, int32>	_nameToId;
 	unordered_map<int32, const char*>	_idToName;
-	stack<int32>						_lockStack;
 	map<int32, set<int32>>				_lockHistory;
+
+	// 각 스레드가 독립적인 락 획득 순서를 추적
+	static thread_local stack<int32>	_lockStack;
 
 	Mutex _lock;
 
