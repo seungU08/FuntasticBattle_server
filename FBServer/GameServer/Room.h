@@ -15,6 +15,9 @@ public:
     void HandleDamage(PlayerRef attacker, CS_DAMAGE_PKT pkt);
     void HandleChat(PlayerRef player, CS_CHAT_PKT pkt);
 
+private:
+    void CheckGameEnd();
+
 public:
     USE_LOCK;
     map<uint64, PlayerRef> _players;

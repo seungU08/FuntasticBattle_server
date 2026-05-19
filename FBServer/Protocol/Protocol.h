@@ -26,6 +26,7 @@ enum class PacketId : unsigned short
     SC_ANIM_STATE       = 1011,
     SC_HIT              = 1012,
     SC_CHAT             = 1020,
+    SC_GAME_END         = 1030,
 };
 
 // ------- Client -> Server -------
@@ -134,6 +135,12 @@ struct SC_HIT_PKT
     uint64 targetId;
     float  amount;
     float  remainHp;
+};
+
+struct SC_GAME_END_PKT
+{
+    PacketHeader h;
+    uint64 winnerId; // 0 이면 무승부
 };
 
 struct SC_CHAT_PKT

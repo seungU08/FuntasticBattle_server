@@ -94,7 +94,7 @@ void Room::HandleDamage(PlayerRef attacker, CS_DAMAGE_PKT pkt)
     if (it == _players.end()) return;
 
     PlayerRef target = it->second;
-    if (target->hp <= 0.f) return;
+    if (!target->alive) return;
 
     target->hp = max(0.f, target->hp - pkt.amount);
 
@@ -103,13 +103,52 @@ void Room::HandleDamage(PlayerRef attacker, CS_DAMAGE_PKT pkt)
     hitPkt.targetId   = target->playerId;
     hitPkt.amount     = pkt.amount;
     hitPkt.remainHp   = target->hp;
-    auto sb = MakeSendBuffer(hitPkt, PacketId::SC_HIT);
-    Broadcast(sb);
+    Broadcast(MakeSendBuffer(hitPkt, PacketId::SC_HIT));
 
     cout << "[데미지] attacker=" << attacker->playerId
          << " target=" << target->playerId
-         << " amount=" << pkt.amount
          << " remainHp=" << target->hp << endl;
+
+    if (target->hp <= 0.f)
+    {
+        target->alive = false;
+        cout << "[사망] playerId=" << target->playerId << endl;
+        CheckGameEnd();
+    }
+}
+
+void Room::CheckGameEnd()
+{
+    if (_players.size() < 2) return;
+
+    PlayerRef winner = nullptr;
+    int32 aliveCount = 0;
+    for (auto& [id, player] : _players)
+    {
+        if (player->alive)
+        {
+            aliveCount++;
+            winner = player;
+        }
+    }
+
+    if (aliveCount > 1) return;
+
+    SC_GAME_END_PKT endPkt{};
+    endPkt.winnerId = (aliveCount == 1) ? winner->playerId : 0;
+    Broadcast(MakeSendBuffer(endPkt, PacketId::SC_GAME_END));
+
+    if (aliveCount == 1)
+        cout << "[게임종료] 승자 playerId=" << endPkt.winnerId << endl;
+    else
+        cout << "[게임종료] 무승부" << endl;
+
+    // 다음 라운드를 위해 모든 플레이어 HP/alive 초기화
+    for (auto& [id, player] : _players)
+    {
+        player->hp    = 100.f;
+        player->alive = true;
+    }
 }
 
 void Room::HandleChat(PlayerRef player, CS_CHAT_PKT pkt)
