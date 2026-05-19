@@ -18,6 +18,7 @@ enum class PacketId : unsigned short
     CS_ITEM_STATE   = 13,
     CS_THROW_BOMB   = 14,
     CS_CHAT         = 20,
+    CS_ITEM_DROP    = 21,
 
     // Server -> Client
     SC_LOGIN_RES        = 1001,
@@ -31,6 +32,7 @@ enum class PacketId : unsigned short
     SC_THROW_BOMB       = 1014,
     SC_CHAT             = 1020,
     SC_GAME_END         = 1030,
+    SC_ITEM_DROP        = 1021,
 };
 
 // ------- Client -> Server -------
@@ -91,6 +93,13 @@ struct CS_CHAT_PKT
 {
     PacketHeader h;
     wchar_t msg[128];
+};
+
+struct CS_ITEM_DROP_PKT
+{
+    PacketHeader h;
+    uint8 itemType; // 1=하트, 2=폭탄
+    float x, y, z;
 };
 
 // ------- Server -> Client -------
@@ -182,6 +191,13 @@ struct SC_CHAT_PKT
     PacketHeader h;
     uint64  playerId;
     wchar_t msg[128];
+};
+
+struct SC_ITEM_DROP_PKT
+{
+    PacketHeader h;
+    uint8 itemType; // 1=하트, 2=폭탄
+    float x, y, z;
 };
 
 #pragma pack(pop)

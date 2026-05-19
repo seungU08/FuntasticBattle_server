@@ -152,6 +152,8 @@ void Room::CheckGameEnd()
         player->hp    = 100.f;
         player->alive = true;
     }
+
+    _recentDropPositions.clear();
 }
 
 void Room::HandleItemState(PlayerRef player, CS_ITEM_STATE_PKT pkt)
@@ -170,6 +172,23 @@ void Room::HandleThrowBomb(PlayerRef player, CS_THROW_BOMB_PKT pkt)
     out.yaw   = pkt.yaw;
     out.pitch = pkt.pitch;
     Broadcast(MakeSendBuffer(out, PacketId::SC_THROW_BOMB), player->playerId);
+}
+
+void Room::HandleItemDrop(PlayerRef player, CS_ITEM_DROP_PKT pkt)
+{
+    // 반경 100 이내에 이미 처리된 드롭 위치가 있으면 중복 무시
+    for (auto& pos : _recentDropPositions)
+    {
+        float dx = pos.x - pkt.x;
+        float dy = pos.y - pkt.y;
+        if (dx*dx + dy*dy < 100.f*100.f) return;
+    }
+    _recentDropPositions.push_back({pkt.x, pkt.y});
+
+    SC_ITEM_DROP_PKT out{};
+    out.itemType = pkt.itemType;
+    out.x = pkt.x; out.y = pkt.y; out.z = pkt.z;
+    Broadcast(MakeSendBuffer(out, PacketId::SC_ITEM_DROP));
 }
 
 void Room::HandleChat(PlayerRef player, CS_CHAT_PKT pkt)

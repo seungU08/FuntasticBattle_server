@@ -21,7 +21,10 @@ void ClientPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
     case PacketId::CS_MOVE:         Handle_CS_MOVE(session, buffer, len);        break;
     case PacketId::CS_ANIM_STATE:   Handle_CS_ANIM_STATE(session, buffer, len);  break;
     case PacketId::CS_DAMAGE:       Handle_CS_DAMAGE(session, buffer, len);      break;
+    case PacketId::CS_ITEM_STATE:   Handle_CS_ITEM_STATE(session, buffer, len);  break;
+    case PacketId::CS_THROW_BOMB:   Handle_CS_THROW_BOMB(session, buffer, len);  break;
     case PacketId::CS_CHAT:         Handle_CS_CHAT(session, buffer, len);        break;
+    case PacketId::CS_ITEM_DROP:    Handle_CS_ITEM_DROP(session, buffer, len);   break;
     default:
         cout << "[서버] 알 수 없는 패킷 ID: " << header->id << endl;
         break;
@@ -127,6 +130,49 @@ void ClientPacketHandler::Handle_CS_DAMAGE(GameSessionRef session, BYTE* buffer,
     CS_DAMAGE_PKT pktCopy = *pkt;
     room->Push(MakeShared<Job>([room, attacker, pktCopy]() mutable {
         room->HandleDamage(attacker, pktCopy);
+    }));
+}
+
+void ClientPacketHandler::Handle_CS_ITEM_STATE(GameSessionRef session, BYTE* buffer, int32 len)
+{
+    CS_ITEM_STATE_PKT* pkt = reinterpret_cast<CS_ITEM_STATE_PKT*>(buffer);
+    if (session->_player == nullptr) return;
+
+    PlayerRef player = session->_player;
+    RoomRef room = player->room;
+    if (room == nullptr) return;
+
+    CS_ITEM_STATE_PKT pktCopy = *pkt;
+    room->Push(MakeShared<Job>([room, player, pktCopy]() mutable {
+        room->HandleItemState(player, pktCopy);
+    }));
+}
+
+void ClientPacketHandler::Handle_CS_THROW_BOMB(GameSessionRef session, BYTE* buffer, int32 len)
+{
+    CS_THROW_BOMB_PKT* pkt = reinterpret_cast<CS_THROW_BOMB_PKT*>(buffer);
+    if (session->_player == nullptr) return;
+
+    PlayerRef player = session->_player;
+    RoomRef room = player->room;
+    if (room == nullptr) return;
+
+    CS_THROW_BOMB_PKT pktCopy = *pkt;
+    room->Push(MakeShared<Job>([room, player, pktCopy]() mutable {
+        room->HandleThrowBomb(player, pktCopy);
+    }));
+}
+
+void ClientPacketHandler::Handle_CS_ITEM_DROP(GameSessionRef session, BYTE* buffer, int32 len)
+{
+    CS_ITEM_DROP_PKT* pkt = reinterpret_cast<CS_ITEM_DROP_PKT*>(buffer);
+    if (session->_player == nullptr) return;
+    PlayerRef player = session->_player;
+    RoomRef room = player->room;
+    if (room == nullptr) return;
+    CS_ITEM_DROP_PKT pktCopy = *pkt;
+    room->Push(MakeShared<Job>([room, player, pktCopy]() mutable {
+        room->HandleItemDrop(player, pktCopy);
     }));
 }
 
