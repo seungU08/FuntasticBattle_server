@@ -66,7 +66,7 @@ bool ServerService::Start()
     if (!_listener->StartAccept(this))
         return false;
 
-    wcout << L"[ServerService] 서버 시작 Port : " << _netAddress.GetPort() << endl;
+    cout << "[ServerService] 서버 시작 Port : " << _netAddress.GetPort() << endl;
     return true;
 }
 

@@ -73,7 +73,7 @@ void Session::Disconnect(const WCHAR* cause)
     if (_connected.exchange(false) == false)
         return;
 
-    wcout << L"Disconnect : " << cause << endl;
+    cout << "Disconnect : " << string(cause, cause + wcslen(cause)) << endl;
     RegisterDisconnect();
 }
 
