@@ -191,6 +191,14 @@ void Room::HandleItemDrop(PlayerRef player, CS_ITEM_DROP_PKT pkt)
     Broadcast(MakeSendBuffer(out, PacketId::SC_ITEM_DROP));
 }
 
+void Room::HandleItemPickup(PlayerRef player, CS_ITEM_PICKUP_PKT pkt)
+{
+    SC_ITEM_PICKUP_PKT out{};
+    out.x = pkt.x; out.y = pkt.y; out.z = pkt.z;
+    // 픽업한 플레이어 제외하고 브로드캐스트 (자신은 이미 Destroy함)
+    Broadcast(MakeSendBuffer(out, PacketId::SC_ITEM_PICKUP), player->playerId);
+}
+
 void Room::HandleChat(PlayerRef player, CS_CHAT_PKT pkt)
 {
     SC_CHAT_PKT chatPkt{};

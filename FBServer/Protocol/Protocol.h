@@ -19,6 +19,7 @@ enum class PacketId : unsigned short
     CS_THROW_BOMB   = 14,
     CS_CHAT         = 20,
     CS_ITEM_DROP    = 21,
+    CS_ITEM_PICKUP  = 22,
 
     // Server -> Client
     SC_LOGIN_RES        = 1001,
@@ -33,6 +34,7 @@ enum class PacketId : unsigned short
     SC_CHAT             = 1020,
     SC_GAME_END         = 1030,
     SC_ITEM_DROP        = 1021,
+    SC_ITEM_PICKUP      = 1022,
 };
 
 // ------- Client -> Server -------
@@ -197,6 +199,18 @@ struct SC_ITEM_DROP_PKT
 {
     PacketHeader h;
     uint8 itemType; // 1=하트, 2=폭탄
+    float x, y, z;
+};
+
+struct CS_ITEM_PICKUP_PKT
+{
+    PacketHeader h;
+    float x, y, z;
+};
+
+struct SC_ITEM_PICKUP_PKT
+{
+    PacketHeader h;
     float x, y, z;
 };
 

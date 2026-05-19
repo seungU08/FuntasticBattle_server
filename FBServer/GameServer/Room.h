@@ -17,6 +17,7 @@ public:
     void HandleThrowBomb(PlayerRef player, CS_THROW_BOMB_PKT pkt);
     void HandleChat(PlayerRef player, CS_CHAT_PKT pkt);
     void HandleItemDrop(PlayerRef player, CS_ITEM_DROP_PKT pkt);
+    void HandleItemPickup(PlayerRef player, CS_ITEM_PICKUP_PKT pkt);
 
 private:
     void CheckGameEnd();
