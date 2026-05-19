@@ -15,6 +15,8 @@ enum class PacketId : unsigned short
     CS_MOVE         = 10,
     CS_ANIM_STATE   = 11,
     CS_DAMAGE       = 12,
+    CS_ITEM_STATE   = 13,
+    CS_THROW_BOMB   = 14,
     CS_CHAT         = 20,
 
     // Server -> Client
@@ -25,6 +27,8 @@ enum class PacketId : unsigned short
     SC_PLAYER_MOVE      = 1010,
     SC_ANIM_STATE       = 1011,
     SC_HIT              = 1012,
+    SC_ITEM_STATE       = 1013,
+    SC_THROW_BOMB       = 1014,
     SC_CHAT             = 1020,
     SC_GAME_END         = 1030,
 };
@@ -67,6 +71,20 @@ struct CS_DAMAGE_PKT
     PacketHeader h;
     uint64 targetId;
     float  amount;
+};
+
+struct CS_ITEM_STATE_PKT
+{
+    PacketHeader h;
+    uint8 itemType; // 0=없음, 1=총, 2=배트, 3=하키, 4=폭탄
+};
+
+struct CS_THROW_BOMB_PKT
+{
+    PacketHeader h;
+    float x, y, z; // 투척 위치
+    float yaw;     // 에임 좌우
+    float pitch;   // 에임 상하
 };
 
 struct CS_CHAT_PKT
@@ -141,6 +159,22 @@ struct SC_GAME_END_PKT
 {
     PacketHeader h;
     uint64 winnerId; // 0 이면 무승부
+};
+
+struct SC_ITEM_STATE_PKT
+{
+    PacketHeader h;
+    uint64 playerId;
+    uint8  itemType;
+};
+
+struct SC_THROW_BOMB_PKT
+{
+    PacketHeader h;
+    uint64 playerId;
+    float  x, y, z;
+    float  yaw;
+    float  pitch;
 };
 
 struct SC_CHAT_PKT

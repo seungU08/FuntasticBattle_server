@@ -154,6 +154,24 @@ void Room::CheckGameEnd()
     }
 }
 
+void Room::HandleItemState(PlayerRef player, CS_ITEM_STATE_PKT pkt)
+{
+    SC_ITEM_STATE_PKT out{};
+    out.playerId = player->playerId;
+    out.itemType = pkt.itemType;
+    Broadcast(MakeSendBuffer(out, PacketId::SC_ITEM_STATE), player->playerId);
+}
+
+void Room::HandleThrowBomb(PlayerRef player, CS_THROW_BOMB_PKT pkt)
+{
+    SC_THROW_BOMB_PKT out{};
+    out.playerId = player->playerId;
+    out.x = pkt.x; out.y = pkt.y; out.z = pkt.z;
+    out.yaw   = pkt.yaw;
+    out.pitch = pkt.pitch;
+    Broadcast(MakeSendBuffer(out, PacketId::SC_THROW_BOMB), player->playerId);
+}
+
 void Room::HandleChat(PlayerRef player, CS_CHAT_PKT pkt)
 {
     SC_CHAT_PKT chatPkt{};
