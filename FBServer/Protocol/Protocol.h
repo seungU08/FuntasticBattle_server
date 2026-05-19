@@ -20,6 +20,7 @@ enum class PacketId : unsigned short
     CS_CHAT         = 20,
     CS_ITEM_DROP    = 21,
     CS_ITEM_PICKUP  = 22,
+    CS_START_GAME   = 23,
 
     // Server -> Client
     SC_LOGIN_RES        = 1001,
@@ -35,6 +36,7 @@ enum class PacketId : unsigned short
     SC_GAME_END         = 1030,
     SC_ITEM_DROP        = 1021,
     SC_ITEM_PICKUP      = 1022,
+    SC_GAME_START       = 1023,
 };
 
 // ------- Client -> Server -------
@@ -126,6 +128,7 @@ struct SC_ENTER_GAME_PKT
     PacketHeader h;
     uint64 myPlayerId;
     uint8  otherCount;
+    uint8  isOwner;   // 1=방장, 0=일반
     // PlayerSnapshot[otherCount] follows (variable length)
 };
 
@@ -212,6 +215,18 @@ struct SC_ITEM_PICKUP_PKT
 {
     PacketHeader h;
     float x, y, z;
+};
+
+struct CS_START_GAME_PKT
+{
+    PacketHeader h;
+};
+
+struct SC_GAME_START_PKT
+{
+    PacketHeader h;
+    uint8  spawnIndex;
+    uint32 itemSeed;
 };
 
 #pragma pack(pop)

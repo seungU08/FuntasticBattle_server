@@ -26,6 +26,7 @@ void ClientPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
     case PacketId::CS_CHAT:         Handle_CS_CHAT(session, buffer, len);        break;
     case PacketId::CS_ITEM_DROP:    Handle_CS_ITEM_DROP(session, buffer, len);   break;
     case PacketId::CS_ITEM_PICKUP:  Handle_CS_ITEM_PICKUP(session, buffer, len); break;
+    case PacketId::CS_START_GAME:   Handle_CS_START_GAME(session, buffer, len);  break;
     default:
         cout << "[서버] 알 수 없는 패킷 ID: " << header->id << endl;
         break;
@@ -187,6 +188,18 @@ void ClientPacketHandler::Handle_CS_ITEM_PICKUP(GameSessionRef session, BYTE* bu
     CS_ITEM_PICKUP_PKT pktCopy = *pkt;
     room->Push(MakeShared<Job>([room, player, pktCopy]() mutable {
         room->HandleItemPickup(player, pktCopy);
+    }));
+}
+
+void ClientPacketHandler::Handle_CS_START_GAME(GameSessionRef session, BYTE* buffer, int32 len)
+{
+    if (session->_player == nullptr) return;
+    PlayerRef player = session->_player;
+    RoomRef room = player->room;
+    if (room == nullptr) return;
+
+    room->Push(MakeShared<Job>([room, player]() mutable {
+        room->HandleStartGame(player);
     }));
 }
 

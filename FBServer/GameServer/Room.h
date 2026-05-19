@@ -18,12 +18,15 @@ public:
     void HandleChat(PlayerRef player, CS_CHAT_PKT pkt);
     void HandleItemDrop(PlayerRef player, CS_ITEM_DROP_PKT pkt);
     void HandleItemPickup(PlayerRef player, CS_ITEM_PICKUP_PKT pkt);
+    void HandleStartGame(PlayerRef player);
 
 private:
     void CheckGameEnd();
 
     struct DropPos { float x, y; };
     vector<DropPos> _recentDropPositions;
+
+    uint64 _ownerId = 0;
 
 public:
     USE_LOCK;

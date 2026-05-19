@@ -5,11 +5,16 @@
 
 void Room::Enter(PlayerRef player)
 {
+    bool bIsFirstPlayer = _players.empty();
+    if (bIsFirstPlayer)
+        _ownerId = player->playerId;
+
     // 입장한 플레이어에게 기존 플레이어 목록 전송
     {
         SC_ENTER_GAME_PKT enterPkt;
         enterPkt.myPlayerId = player->playerId;
         enterPkt.otherCount = static_cast<uint8>(_players.size());
+        enterPkt.isOwner    = bIsFirstPlayer ? 1 : 0;
         auto sb = MakeSendBuffer(enterPkt, PacketId::SC_ENTER_GAME);
         player->ownerSession->Send(sb);
     }
@@ -197,6 +202,25 @@ void Room::HandleItemPickup(PlayerRef player, CS_ITEM_PICKUP_PKT pkt)
     out.x = pkt.x; out.y = pkt.y; out.z = pkt.z;
     // 픽업한 플레이어 제외하고 브로드캐스트 (자신은 이미 Destroy함)
     Broadcast(MakeSendBuffer(out, PacketId::SC_ITEM_PICKUP), player->playerId);
+}
+
+void Room::HandleStartGame(PlayerRef player)
+{
+    if (player->playerId != _ownerId) return;
+
+    uint32 itemSeed = static_cast<uint32>(GetTickCount64());
+
+    uint8 idx = 0;
+    for (auto& [id, p] : _players)
+    {
+        SC_GAME_START_PKT startPkt{};
+        startPkt.spawnIndex = idx++;
+        startPkt.itemSeed   = itemSeed;
+        p->ownerSession->Send(MakeSendBuffer(startPkt, PacketId::SC_GAME_START));
+    }
+
+    cout << "[게임시작] 방장=" << player->playerId << " seed=" << itemSeed
+         << " 인원=" << (int)idx << endl;
 }
 
 void Room::HandleChat(PlayerRef player, CS_CHAT_PKT pkt)
