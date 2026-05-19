@@ -12,6 +12,7 @@ public:
 
     void HandleMove(PlayerRef player, CS_MOVE_PKT pkt);
     void HandleAnimState(PlayerRef player, CS_ANIM_STATE_PKT pkt);
+    void HandleDamage(PlayerRef attacker, CS_DAMAGE_PKT pkt);
     void HandleChat(PlayerRef player, CS_CHAT_PKT pkt);
 
 public:

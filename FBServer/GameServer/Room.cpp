@@ -88,6 +88,30 @@ void Room::HandleAnimState(PlayerRef player, CS_ANIM_STATE_PKT pkt)
     Broadcast(sb, player->playerId);
 }
 
+void Room::HandleDamage(PlayerRef attacker, CS_DAMAGE_PKT pkt)
+{
+    auto it = _players.find(pkt.targetId);
+    if (it == _players.end()) return;
+
+    PlayerRef target = it->second;
+    if (target->hp <= 0.f) return;
+
+    target->hp = max(0.f, target->hp - pkt.amount);
+
+    SC_HIT_PKT hitPkt{};
+    hitPkt.attackerId = attacker->playerId;
+    hitPkt.targetId   = target->playerId;
+    hitPkt.amount     = pkt.amount;
+    hitPkt.remainHp   = target->hp;
+    auto sb = MakeSendBuffer(hitPkt, PacketId::SC_HIT);
+    Broadcast(sb);
+
+    cout << "[데미지] attacker=" << attacker->playerId
+         << " target=" << target->playerId
+         << " amount=" << pkt.amount
+         << " remainHp=" << target->hp << endl;
+}
+
 void Room::HandleChat(PlayerRef player, CS_CHAT_PKT pkt)
 {
     SC_CHAT_PKT chatPkt{};

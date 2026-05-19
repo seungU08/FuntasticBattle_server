@@ -15,6 +15,7 @@ public:
     float           yaw = 0;
     float           vx = 0, vy = 0, vz = 0;
     uint8           animState   = 0;
+    float           hp          = 100.f;
 
     RoomRef         room;
     GameSessionRef  ownerSession;

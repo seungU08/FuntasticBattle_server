@@ -14,6 +14,7 @@ enum class PacketId : unsigned short
     CS_LEAVE_ROOM   = 3,
     CS_MOVE         = 10,
     CS_ANIM_STATE   = 11,
+    CS_DAMAGE       = 12,
     CS_CHAT         = 20,
 
     // Server -> Client
@@ -21,8 +22,9 @@ enum class PacketId : unsigned short
     SC_ENTER_GAME       = 1002,
     SC_PLAYER_ENTER     = 1003,
     SC_PLAYER_LEAVE     = 1004,
-    SC_PLAYER_MOVE      = 1010,   // SC_MOVE는 Windows.h 매크로와 충돌하므로 SC_PLAYER_MOVE 사용
+    SC_PLAYER_MOVE      = 1010,
     SC_ANIM_STATE       = 1011,
+    SC_HIT              = 1012,
     SC_CHAT             = 1020,
 };
 
@@ -57,6 +59,13 @@ struct CS_ANIM_STATE_PKT
 {
     PacketHeader h;
     uint8 state;
+};
+
+struct CS_DAMAGE_PKT
+{
+    PacketHeader h;
+    uint64 targetId;
+    float  amount;
 };
 
 struct CS_CHAT_PKT
@@ -116,6 +125,15 @@ struct SC_ANIM_STATE_PKT
     PacketHeader h;
     uint64 playerId;
     uint8  state;
+};
+
+struct SC_HIT_PKT
+{
+    PacketHeader h;
+    uint64 attackerId;
+    uint64 targetId;
+    float  amount;
+    float  remainHp;
 };
 
 struct SC_CHAT_PKT

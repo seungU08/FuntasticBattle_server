@@ -20,6 +20,7 @@ void ClientPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
     case PacketId::CS_LEAVE_ROOM:   Handle_CS_LEAVE_ROOM(session, buffer, len);  break;
     case PacketId::CS_MOVE:         Handle_CS_MOVE(session, buffer, len);        break;
     case PacketId::CS_ANIM_STATE:   Handle_CS_ANIM_STATE(session, buffer, len);  break;
+    case PacketId::CS_DAMAGE:       Handle_CS_DAMAGE(session, buffer, len);      break;
     case PacketId::CS_CHAT:         Handle_CS_CHAT(session, buffer, len);        break;
     default:
         cout << "[서버] 알 수 없는 패킷 ID: " << header->id << endl;
@@ -110,6 +111,22 @@ void ClientPacketHandler::Handle_CS_ANIM_STATE(GameSessionRef session, BYTE* buf
     CS_ANIM_STATE_PKT pktCopy = *pkt;
     room->Push(MakeShared<Job>([room, player, pktCopy]() mutable {
         room->HandleAnimState(player, pktCopy);
+    }));
+}
+
+void ClientPacketHandler::Handle_CS_DAMAGE(GameSessionRef session, BYTE* buffer, int32 len)
+{
+    CS_DAMAGE_PKT* pkt = reinterpret_cast<CS_DAMAGE_PKT*>(buffer);
+
+    if (session->_player == nullptr) return;
+
+    PlayerRef attacker = session->_player;
+    RoomRef room = attacker->room;
+    if (room == nullptr) return;
+
+    CS_DAMAGE_PKT pktCopy = *pkt;
+    room->Push(MakeShared<Job>([room, attacker, pktCopy]() mutable {
+        room->HandleDamage(attacker, pktCopy);
     }));
 }
 
