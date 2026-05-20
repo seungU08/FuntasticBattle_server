@@ -24,6 +24,6 @@ int32 GameSessionManager::GetCount()
 void GameSessionManager::BroadcastToAll(SendBufferRef sb)
 {
     READ_LOCK;
-    for (auto& session : _sessions)
+    for (GameSessionRef session : _sessions)
         session->Send(sb);
 }

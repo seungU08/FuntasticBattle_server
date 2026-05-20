@@ -74,7 +74,14 @@ void Session::Disconnect(const WCHAR* cause)
         return;
 
     cout << "Disconnect : " << string(cause, cause + wcslen(cause)) << endl;
-    RegisterDisconnect();
+    if (!RegisterDisconnect())
+    {
+        // DisconnectEx가 동기 실패(RST 등)한 경우 직접 정리
+        SessionRef keepAlive(this);
+        OnDisconnected();
+        if (_service)
+            _service->ReleaseSession(keepAlive);
+    }
 }
 
 // =====================

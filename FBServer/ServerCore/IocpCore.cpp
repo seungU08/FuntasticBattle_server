@@ -37,6 +37,8 @@ bool IocpCore::Dispatch(uint32 timeoutMs)
         timeoutMs))
     {
         IocpObjectRef iocpObject = iocpEvent->owner;
+        if (iocpObject.IsNull())
+            return true;
         iocpObject->Dispatch(iocpEvent, numOfBytes);
     }
     else
@@ -53,6 +55,8 @@ bool IocpCore::Dispatch(uint32 timeoutMs)
             if (iocpEvent != nullptr)
             {
                 IocpObjectRef iocpObject = iocpEvent->owner;
+                if (iocpObject.IsNull())
+                    break;
                 iocpObject->Dispatch(iocpEvent, numOfBytes);
             }
             break;
