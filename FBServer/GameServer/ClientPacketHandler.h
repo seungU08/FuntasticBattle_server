@@ -22,4 +22,6 @@ private:
     static void Handle_CS_ITEM_DROP(GameSessionRef session, BYTE* buffer, int32 len);
     static void Handle_CS_ITEM_PICKUP(GameSessionRef session, BYTE* buffer, int32 len);
     static void Handle_CS_START_GAME(GameSessionRef session, BYTE* buffer, int32 len);
+    static void Handle_CS_CREATE_ROOM(GameSessionRef session, BYTE* buffer, int32 len);
+    static void Handle_CS_REQUEST_ROOM_LIST(GameSessionRef session, BYTE* buffer, int32 len);
 };

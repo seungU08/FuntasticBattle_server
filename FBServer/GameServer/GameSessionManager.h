@@ -7,6 +7,7 @@ public:
     void Add(GameSessionRef session);
     void Remove(GameSessionRef session);
     int32 GetCount();
+    void BroadcastToAll(SendBufferRef sb);
 
 private:
     USE_LOCK;

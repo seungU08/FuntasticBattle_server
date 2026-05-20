@@ -21,6 +21,8 @@ enum class PacketId : unsigned short
     CS_ITEM_DROP    = 21,
     CS_ITEM_PICKUP  = 22,
     CS_START_GAME   = 23,
+    CS_CREATE_ROOM       = 24,
+    CS_REQUEST_ROOM_LIST = 25,
 
     // Server -> Client
     SC_LOGIN_RES        = 1001,
@@ -37,6 +39,7 @@ enum class PacketId : unsigned short
     SC_ITEM_DROP        = 1021,
     SC_ITEM_PICKUP      = 1022,
     SC_GAME_START       = 1023,
+    SC_ROOM_LIST        = 1024,
 };
 
 // ------- Client -> Server -------
@@ -222,11 +225,37 @@ struct CS_START_GAME_PKT
     PacketHeader h;
 };
 
+struct CS_CREATE_ROOM_PKT
+{
+    PacketHeader h;
+    wchar_t name[32];
+};
+
+struct CS_REQUEST_ROOM_LIST_PKT
+{
+    PacketHeader h;
+};
+
 struct SC_GAME_START_PKT
 {
     PacketHeader h;
     uint8  spawnIndex;
     uint32 itemSeed;
+};
+
+struct RoomEntry
+{
+    uint32  roomId;
+    uint8   playerCount;
+    uint8   isStarted;
+    wchar_t name[32];
+};
+
+struct SC_ROOM_LIST_PKT
+{
+    PacketHeader h;
+    uint8     count;
+    RoomEntry rooms[10];
 };
 
 #pragma pack(pop)

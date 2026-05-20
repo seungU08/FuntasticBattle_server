@@ -1,10 +1,15 @@
 #include "pch.h"
 #include "Room.h"
+#include "RoomManager.h"
 #include "GameSession.h"
 #include "MakeSendBuffer.h"
 
 void Room::Enter(PlayerRef player)
 {
+    // 꽉 찼거나 이미 시작된 방이면 입장 거부
+    if (IsFull() || IsStarted())
+        return;
+
     bool bIsFirstPlayer = _players.empty();
     if (bIsFirstPlayer)
         _ownerId = player->playerId;
@@ -44,6 +49,10 @@ void Room::Enter(PlayerRef player)
 
     _players[player->playerId] = player;
     player->room = TSharedPtr<Room>(this);
+    _playerCount++;
+
+    // 방 리스트 전체 브로드캐스트
+    GRoomManager->BroadcastRoomList();
 }
 
 void Room::Leave(PlayerRef player)
@@ -53,11 +62,22 @@ void Room::Leave(PlayerRef player)
 
     _players.erase(player->playerId);
     player->room = nullptr;
+    if (_playerCount > 0)
+        _playerCount--;
 
     SC_PLAYER_LEAVE_PKT leavePkt{};
     leavePkt.playerId = player->playerId;
     auto sb = MakeSendBuffer(leavePkt, PacketId::SC_PLAYER_LEAVE);
     Broadcast(sb);
+
+    // 방이 비면 제거
+    if (_players.empty())
+    {
+        GRoomManager->RemoveRoom(_roomId);
+    }
+
+    // 방 리스트 전체 브로드캐스트
+    GRoomManager->BroadcastRoomList();
 }
 
 void Room::Broadcast(SendBufferRef sendBuffer, uint64 exceptPlayerId)
@@ -208,6 +228,8 @@ void Room::HandleStartGame(PlayerRef player)
 {
     if (player->playerId != _ownerId) return;
 
+    _isStarted = true;
+
     uint32 itemSeed = static_cast<uint32>(GetTickCount64());
 
     uint8 idx = 0;
@@ -221,6 +243,9 @@ void Room::HandleStartGame(PlayerRef player)
 
     cout << "[게임시작] 방장=" << player->playerId << " seed=" << itemSeed
          << " 인원=" << (int)idx << endl;
+
+    // 시작된 방은 리스트에서 숨김
+    GRoomManager->BroadcastRoomList();
 }
 
 void Room::HandleChat(PlayerRef player, CS_CHAT_PKT pkt)

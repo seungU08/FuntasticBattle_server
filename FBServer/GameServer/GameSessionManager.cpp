@@ -20,3 +20,10 @@ int32 GameSessionManager::GetCount()
     READ_LOCK;
     return static_cast<int32>(_sessions.size());
 }
+
+void GameSessionManager::BroadcastToAll(SendBufferRef sb)
+{
+    READ_LOCK;
+    for (auto& session : _sessions)
+        session->Send(sb);
+}

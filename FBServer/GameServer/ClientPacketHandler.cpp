@@ -26,7 +26,9 @@ void ClientPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
     case PacketId::CS_CHAT:         Handle_CS_CHAT(session, buffer, len);        break;
     case PacketId::CS_ITEM_DROP:    Handle_CS_ITEM_DROP(session, buffer, len);   break;
     case PacketId::CS_ITEM_PICKUP:  Handle_CS_ITEM_PICKUP(session, buffer, len); break;
-    case PacketId::CS_START_GAME:   Handle_CS_START_GAME(session, buffer, len);  break;
+    case PacketId::CS_START_GAME:        Handle_CS_START_GAME(session, buffer, len);        break;
+    case PacketId::CS_CREATE_ROOM:       Handle_CS_CREATE_ROOM(session, buffer, len);       break;
+    case PacketId::CS_REQUEST_ROOM_LIST: Handle_CS_REQUEST_ROOM_LIST(session, buffer, len); break;
     default:
         cout << "[서버] 알 수 없는 패킷 ID: " << header->id << endl;
         break;
@@ -49,6 +51,9 @@ void ClientPacketHandler::Handle_CS_LOGIN(GameSessionRef session, BYTE* buffer, 
     res.playerId = player->playerId;
     res.success  = 1;
     session->Send(MakeSendBuffer(res, PacketId::SC_LOGIN_RES));
+
+    // 로그인 완료 후 현재 방 리스트 전송
+    session->Send(GRoomManager->MakeRoomListPacket());
 }
 
 void ClientPacketHandler::Handle_CS_ENTER_ROOM(GameSessionRef session, BYTE* buffer, int32 len)
@@ -219,4 +224,32 @@ void ClientPacketHandler::Handle_CS_CHAT(GameSessionRef session, BYTE* buffer, i
     room->Push(MakeShared<Job>([room, player, pktCopy]() mutable {
         room->HandleChat(player, pktCopy);
     }));
+}
+
+void ClientPacketHandler::Handle_CS_CREATE_ROOM(GameSessionRef session, BYTE* buffer, int32 len)
+{
+    CS_CREATE_ROOM_PKT* pkt = reinterpret_cast<CS_CREATE_ROOM_PKT*>(buffer);
+
+    if (session->_player == nullptr)
+        return;
+
+    PlayerRef player = session->_player;
+    wstring roomName(pkt->name, wcsnlen(pkt->name, 32));
+
+    // 방 생성
+    RoomRef room = GRoomManager->CreateRoom(roomName);
+
+    // 생성자 자동 입장
+    room->Push(MakeShared<Job>([room, player]() mutable {
+        room->Enter(player);
+    }));
+
+    wcout << L"[방생성] roomId=" << room->GetRoomId()
+          << L" name=" << room->GetName()
+          << L" playerCount=" << (int)room->GetPlayerCount() << endl;
+}
+
+void ClientPacketHandler::Handle_CS_REQUEST_ROOM_LIST(GameSessionRef session, BYTE* buffer, int32 len)
+{
+    session->Send(GRoomManager->MakeRoomListPacket());
 }
