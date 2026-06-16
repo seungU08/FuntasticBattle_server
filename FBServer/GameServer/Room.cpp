@@ -10,6 +10,10 @@ void Room::Enter(PlayerRef player)
     if (IsFull() || IsStarted())
         return;
 
+    // 새 방 입장 시 플레이어 상태 초기화 (이전 게임 잔여 상태 방지)
+    player->hp    = 100.f;
+    player->alive = true;
+
     bool bIsFirstPlayer = _players.empty();
     if (bIsFirstPlayer)
         _ownerId = player->playerId;
