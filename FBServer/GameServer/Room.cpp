@@ -175,14 +175,17 @@ void Room::CheckGameEnd()
     else
         cout << "[게임종료] 무승부" << endl;
 
-    // 다음 라운드를 위해 모든 플레이어 HP/alive 초기화
+    // 대기방 상태로 복귀
+    _isStarted = false;
+    _recentDropPositions.clear();
+
     for (auto& [id, player] : _players)
     {
         player->hp    = 100.f;
         player->alive = true;
     }
 
-    _recentDropPositions.clear();
+    GRoomManager->BroadcastRoomList();
 }
 
 void Room::HandleItemState(PlayerRef player, CS_ITEM_STATE_PKT pkt)

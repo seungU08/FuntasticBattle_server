@@ -22,6 +22,27 @@ int main()
 
     ASSERT_CRASH(service->Start());
 
+    // 로컬 IP 주소 출력
+    {
+        char hostName[256] = {};
+        gethostname(hostName, sizeof(hostName));
+
+        addrinfo hints = {}, *result = nullptr;
+        hints.ai_family = AF_INET;
+        if (getaddrinfo(hostName, nullptr, &hints, &result) == 0)
+        {
+            cout << "[GameServer] 서버 IP 주소 목록:" << endl;
+            for (addrinfo* ptr = result; ptr != nullptr; ptr = ptr->ai_next)
+            {
+                char ipStr[INET_ADDRSTRLEN] = {};
+                sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(ptr->ai_addr);
+                inet_ntop(AF_INET, &addr->sin_addr, ipStr, sizeof(ipStr));
+                cout << "  " << ipStr << endl;
+            }
+            freeaddrinfo(result);
+        }
+    }
+
     int32 workerCount = max(1, static_cast<int32>(thread::hardware_concurrency()));
     for (int32 i = 0; i < workerCount; i++)
     {
