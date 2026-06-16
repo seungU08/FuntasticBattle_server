@@ -29,6 +29,7 @@ void ClientPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
     case PacketId::CS_START_GAME:        Handle_CS_START_GAME(session, buffer, len);        break;
     case PacketId::CS_CREATE_ROOM:       Handle_CS_CREATE_ROOM(session, buffer, len);       break;
     case PacketId::CS_REQUEST_ROOM_LIST: Handle_CS_REQUEST_ROOM_LIST(session, buffer, len); break;
+    case PacketId::CS_CHAR_CUSTOMIZE:    Handle_CS_CHAR_CUSTOMIZE(session, buffer, len);    break;
     default:
         cout << "[서버] 알 수 없는 패킷 ID: " << header->id << endl;
         break;
@@ -252,4 +253,19 @@ void ClientPacketHandler::Handle_CS_CREATE_ROOM(GameSessionRef session, BYTE* bu
 void ClientPacketHandler::Handle_CS_REQUEST_ROOM_LIST(GameSessionRef session, BYTE* buffer, int32 len)
 {
     session->Send(GRoomManager->MakeRoomListPacket());
+}
+
+void ClientPacketHandler::Handle_CS_CHAR_CUSTOMIZE(GameSessionRef session, BYTE* buffer, int32 len)
+{
+    CS_CHAR_CUSTOMIZE_PKT* pkt = reinterpret_cast<CS_CHAR_CUSTOMIZE_PKT*>(buffer);
+    if (session->_player == nullptr) return;
+
+    PlayerRef player = session->_player;
+    RoomRef room = player->room;
+    if (room == nullptr) return;
+
+    CS_CHAR_CUSTOMIZE_PKT pktCopy = *pkt;
+    room->Push(MakeShared<Job>([room, player, pktCopy]() mutable {
+        room->HandleCharCustomize(player, pktCopy);
+    }));
 }

@@ -17,6 +17,8 @@ public:
     uint8           animState   = 0;
     float           hp          = 100.f;
     bool            alive       = true;
+    uint8           colorIndex  = 0;
+    uint8           meshIndex   = 0;
 
     RoomRef         room;
     GameSessionRef  ownerSession;

@@ -28,9 +28,11 @@ void Room::Enter(PlayerRef player)
     for (auto& [id, other] : _players)
     {
         SC_PLAYER_ENTER_PKT snapPkt{};
-        snapPkt.p.playerId = other->playerId;
+        snapPkt.p.playerId   = other->playerId;
         snapPkt.p.x = other->x; snapPkt.p.y = other->y; snapPkt.p.z = other->z;
-        snapPkt.p.yaw = other->yaw;
+        snapPkt.p.yaw        = other->yaw;
+        snapPkt.p.colorIndex = other->colorIndex;
+        snapPkt.p.meshIndex  = other->meshIndex;
         ::wcsncpy_s(snapPkt.p.name, other->name.c_str(), 16);
         auto sb = MakeSendBuffer(snapPkt, PacketId::SC_PLAYER_ENTER);
         player->ownerSession->Send(sb);
@@ -39,9 +41,11 @@ void Room::Enter(PlayerRef player)
     // 기존 모든 플레이어에게 새 플레이어 입장 알림
     {
         SC_PLAYER_ENTER_PKT newPkt{};
-        newPkt.p.playerId = player->playerId;
+        newPkt.p.playerId   = player->playerId;
         newPkt.p.x = player->x; newPkt.p.y = player->y; newPkt.p.z = player->z;
-        newPkt.p.yaw = player->yaw;
+        newPkt.p.yaw        = player->yaw;
+        newPkt.p.colorIndex = player->colorIndex;
+        newPkt.p.meshIndex  = player->meshIndex;
         ::wcsncpy_s(newPkt.p.name, player->name.c_str(), 16);
         auto sb = MakeSendBuffer(newPkt, PacketId::SC_PLAYER_ENTER);
         Broadcast(sb, player->playerId);
@@ -246,6 +250,18 @@ void Room::HandleStartGame(PlayerRef player)
 
     // 시작된 방은 리스트에서 숨김
     GRoomManager->BroadcastRoomList();
+}
+
+void Room::HandleCharCustomize(PlayerRef player, CS_CHAR_CUSTOMIZE_PKT pkt)
+{
+    player->colorIndex = pkt.colorIndex;
+    player->meshIndex  = pkt.meshIndex;
+
+    SC_CHAR_CUSTOMIZE_PKT out{};
+    out.playerId   = player->playerId;
+    out.colorIndex = pkt.colorIndex;
+    out.meshIndex  = pkt.meshIndex;
+    Broadcast(MakeSendBuffer(out, PacketId::SC_CHAR_CUSTOMIZE), player->playerId);
 }
 
 void Room::HandleChat(PlayerRef player, CS_CHAT_PKT pkt)

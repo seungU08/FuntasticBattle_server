@@ -23,6 +23,7 @@ enum class PacketId : unsigned short
     CS_START_GAME   = 23,
     CS_CREATE_ROOM       = 24,
     CS_REQUEST_ROOM_LIST = 25,
+    CS_CHAR_CUSTOMIZE    = 26,
 
     // Server -> Client
     SC_LOGIN_RES        = 1001,
@@ -40,6 +41,7 @@ enum class PacketId : unsigned short
     SC_ITEM_PICKUP      = 1022,
     SC_GAME_START       = 1023,
     SC_ROOM_LIST        = 1024,
+    SC_CHAR_CUSTOMIZE   = 1025,
 };
 
 // ------- Client -> Server -------
@@ -124,6 +126,8 @@ struct PlayerSnapshot
     float   x, y, z;
     float   yaw;
     wchar_t name[16];
+    uint8   colorIndex;
+    uint8   meshIndex;
 };
 
 struct SC_ENTER_GAME_PKT
@@ -225,6 +229,13 @@ struct CS_START_GAME_PKT
     PacketHeader h;
 };
 
+struct CS_CHAR_CUSTOMIZE_PKT
+{
+    PacketHeader h;
+    uint8 colorIndex;
+    uint8 meshIndex;
+};
+
 struct CS_CREATE_ROOM_PKT
 {
     PacketHeader h;
@@ -241,6 +252,14 @@ struct SC_GAME_START_PKT
     PacketHeader h;
     uint8  spawnIndex;
     uint32 itemSeed;
+};
+
+struct SC_CHAR_CUSTOMIZE_PKT
+{
+    PacketHeader h;
+    uint64 playerId;
+    uint8  colorIndex;
+    uint8  meshIndex;
 };
 
 struct RoomEntry

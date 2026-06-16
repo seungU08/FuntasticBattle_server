@@ -25,6 +25,7 @@ public:
     void HandleItemDrop(PlayerRef player, CS_ITEM_DROP_PKT pkt);
     void HandleItemPickup(PlayerRef player, CS_ITEM_PICKUP_PKT pkt);
     void HandleStartGame(PlayerRef player);
+    void HandleCharCustomize(PlayerRef player, CS_CHAR_CUSTOMIZE_PKT pkt);
 
     // getter
     uint32        GetRoomId()      const { return _roomId; }
